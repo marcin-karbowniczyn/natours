@@ -1,0 +1,26 @@
+extends base
+
+//- mixin signUpFormField(id)
+//-   .form__group
+//-     label.form__label(for='email') Email address (use it as your login)
+//-     input.form__input(id=id, type='email', placeholder='you@example.com', required)
+
+block content
+  main.main
+    .login-form
+      h2.heading-secondary.ma-bt-lg Sign up to Natours
+      form.form.form--signup
+        .form__group
+          label.form__label(for='email') Email address (it will be your login)
+          input#email.form__input(type='email', placeholder='you@example.com', required)
+        .form__group.ma-bt-md
+          label.form__label(for='name') Name
+          input#name.form__input(type='text', placeholder='Adam Smith')
+        .form__group.ma-bt-md
+          label.form__label(for='password') Password
+          input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')  
+        .form__group.ma-bt-md
+          label.form__label(for='passwordConfirm') Password confirm
+          input#passwordConfirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
+        .form__group
+          button.btn.btn--green.btn--signup Sign up

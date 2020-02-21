@@ -1,0 +1,109 @@
+extends base
+include _reviewCard
+
+//- Dodajemy linijkę kodu do head, które wzięliśmy z base z plikiem JS. 
+//- append: dodane na końcu, prepend: dodane na początku
+block append head
+  //- Zamiast NPM używamy w ten sposób library mapbox, ponieważ są jakieś problemy z działaniem tej biblioteki z Parcel, jeśli obie są zainstalowane przez NPM.
+  script(src='https://api.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js') 
+  link(href='https://api.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet')
+
+
+//- Mixins to kawałek kodu, który możemy użyc kilka razy, coś jak funkcja
+mixin overviewBox(label, text, icon)
+  .overview-box__detail
+    svg.overview-box__icon
+      use(xlink:href=`/img/icons.svg#icon-${icon}`)
+    span.overview-box__label= label
+    span.overview-box__text= text
+
+block content
+  section.section-header
+    .header__hero
+      .header__hero-overlay &nbsp;
+      img.header__hero-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+
+    .heading-box
+      h1.heading-primary
+        span= `${tour.name} tour`
+      .heading-box__group
+        .heading-box__detail
+          svg.heading-box__icon
+            use(xlink:href='/img/icons.svg#icon-clock')
+          span.heading-box__text= `${tour.duration} days`
+        .heading-box__detail
+          svg.heading-box__icon
+            use(xlink:href='/img/icons.svg#icon-map-pin')
+          span.heading-box__text= tour.startLocation.description
+        .heading-box__detail
+          button#fav-btn(data-tour-id=`${tour.id}`) 
+            svg.heading-box__icon
+              use(xlink:href='/img/icons.svg#icon-heart')
+            span.heading-box__text Add this tour to your favourites!     
+            //- trash
+  section.section-description
+    .overview-box
+      div
+        .overview-box__group
+          h2.heading-secondary.ma-bt-lg Quick facts
+
+          //- Poniższy kod JS to kod, który nie zwraca żadnego outputu i musimy tak go zapisać.
+          - const date = tour.startDates[0].date.toLocaleString('en-us', { month: 'long', year: 'numeric'})
+          +overviewBox('Next date', date, 'calendar')
+          +overviewBox('Difficulty', tour.difficulty, 'trending-up')
+          +overviewBox('Participants', `${tour.maxGroupSize} people`, 'user')
+          +overviewBox('Rating', `${tour.ratingsAverage} / 5`, 'star')
+
+        .overview-box__group
+          h2.heading-secondary.ma-bt-lg Your tour guides
+          //- guide może być nazwany jak chcemy, może być to guide, el, x itd.
+          each el in tour.guides
+            .overview-box__detail
+              img.overview-box__img(src=`/img/users/${el.photo}`, alt=`${el.name}`)
+
+              - if (el.role === 'lead-guide')
+                span.overview-box__label Lead guide
+              - if (el.role === 'guide')
+                span.overview-box__label Tour guide
+              span.overview-box__text= el.name
+
+    .description-box
+      h2.heading-secondary.ma-bt-lg= `About ${tour.name} tour`
+      - const paragraphs = tour.description.split('\n');
+      each el in paragraphs
+        p.description__text= el
+
+  section.section-pictures
+    each el, i in tour.images
+      .picture-box
+        img.picture-box__img(src=`/img/tours/${el}`, alt=`${tour.name} Tour ${i + 1}`, class=`picture-box__img--${i + 1}`)
+        //- Powyżej musieliśmy dodać zmienną w nazwę klasy, więc zamiast definiować tej klasy bezpośrednio na obiekcie img, dodaliśmy ją później w nawiasie, razem z innymi atrybutami
+
+  section.section-map
+    #map(data-locations=`${JSON.stringify(tour.locations)}`)
+
+  section.section-reviews
+    .reviews
+      each review in tour.reviews
+        +reviewCard(review)
+
+
+  section.section-cta
+    .cta
+      .cta__img.cta__img--logo
+        img(src='/img/logo-white.png', alt='Natours logo')
+      img.cta__img.cta__img--1(src=`/img/tours/${tour.images[1]}`, alt='Tour picture')
+      img.cta__img.cta__img--2(src=`/img/tours/${tour.images[2]}`, alt='Tour picture')
+      .cta__content
+        h2.heading-secondary What are you waiting for?
+        p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
+
+        if user
+          //- tour-id jest konwertowane w tourId (ponieważ występuje -)
+          button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+          select.selectStartDate
+            each tourDate in tour.startDates
+              - if (tourDate.maxParticipants > tourDate.participants)
+                option(value=`${tourDate._id}`)= `${tourDate.date.toLocaleString('en-us', {day: 'numeric', month: 'long', year: 'numeric'})}` 
+        else
+          a.btn.btn--green.span-all-rows(href='/login') Log in to book tour!
