@@ -47,7 +47,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     customer_email: req.user.email,
     client_reference_id: req.params.tourId,
     metadata: {
-      tour_startDateId: req.params.startDateId // DODAŁEM TO I NIE WIEM CZY BĘDZIE DZIAŁAĆ
+      tour_startDateId: req.params.startDateId
     },
     // Informacje o produkcie, który zamierza zakupić klient.
     line_items: [
