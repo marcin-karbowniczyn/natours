@@ -90,6 +90,8 @@ app.use((req, res, next) => {
   next();
 });
 
+//  testowe zmiany
+
 // 2) ROUTES
 app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
