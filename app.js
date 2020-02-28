@@ -19,7 +19,6 @@ const bookingRouter = require(`./routes/bookingRoutes`);
 const bookingController = require(`./controllers/bookingController`);
 const viewRouter = require(`./routes/viewRoutes`);
 
-const dupa = { marcin: 'dupa' }
 // Start express app
 const app = express('trust proxy'); // Mamy deploy na heroku, a on przez proxy zmienia request, żeby aplikacja działała, musi być to.
 

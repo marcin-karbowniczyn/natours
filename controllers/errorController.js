@@ -84,9 +84,9 @@ const sendErrorProd = (err, req, res) => {
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500; // Jeśli undifined, to statusCode === 500
   err.status = err.status || 'error'; // Jeśli undifined, to status === 'error'
-  
 
   if (process.env.NODE_ENV === 'development') {
+    
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };

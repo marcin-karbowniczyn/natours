@@ -68,7 +68,7 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError('Please provide email and password', 400));
   }
-
+  
   // '+password' - zaznaczamy, że potrzebujemy password, który wcześniej został ukryty w modelu
   const user = await User.findOne({ email }).select('+password +counter +blocked'); // { email } === { email: email }
 

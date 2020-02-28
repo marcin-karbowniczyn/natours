@@ -5,7 +5,7 @@ const Tour = require('./../../models/tourModel');
 const User = require('./../../models/userModel');
 const Review = require('./../../models/reviewModel');
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: '../../config.env' });
 
 // Musimy podłączyć się do DB, ponieważ ten skrypt działa niezależnie od express application, będzie uruchomiony tylko raz na początku.
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
