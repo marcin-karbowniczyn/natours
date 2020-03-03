@@ -62,7 +62,13 @@ const userSchema = new mongoose.Schema(
       default: false,
       select: false
     },
-    timeBlocked: Date
+    timeBlocked: Date,
+    favouriteTours: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tour'
+      }
+    ]
   },
   {
     toJSON: { virtuals: true },
@@ -160,6 +166,22 @@ userSchema.methods.checkIfBlocked = async function() {
 
   // 3) Return time to unblock for error handling
   return timeToUnblock;
+};
+
+userSchema.methods.isTourFavourite = function(tourId) {
+  return this.favouriteTours.includes(tourId);
+};
+
+userSchema.methods.addToFavourites = async function(tourId) {
+  this.favouriteTours.push(tourId);
+  const updatedUser = await this.save({ validateBeforeSave: false });
+  return updatedUser;
+};
+
+userSchema.methods.deleteFromFavourites = async function(tourId) {
+  const tourIndex = this.favouriteTours.indexOf(tourId);
+  this.favouriteTours.splice(tourIndex, 1);
+  await this.save({ validateBeforeSave: false });
 };
 
 const User = mongoose.model('User', userSchema);

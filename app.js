@@ -107,8 +107,6 @@ app.all('*', (req, res, next) => {
 // GLOBAL ERROR HANDLING MIDDLEWARE -> Express wie, że to jest middleware, który obsługuje errory, bo pierwszy argument w funkcji to error.
 app.use(globalErrorHandler);
 
-// Sprawdzam czy push działa po formacie jeszcze raz
-
 module.exports = app;
 
 /***********************************************************/

@@ -19,13 +19,14 @@ router.use(authController.protect);
 
 router.patch('/updateMyPassword', authController.updatePassword);
 router.get('/me', userController.getMe, userController.getUser);
-router.patch(
-  '/updateMe',
-  userController.uploadUserPhoto,
-  userController.resizeUserPhoto,
-  userController.updateMe
-);
+router.patch('/updateMe', userController.uploadUserPhoto, userController.resizeUserPhoto, userController.updateMe);
 router.delete('/deleteMe', userController.deleteMe); // Używamy delete dlatego, że user i tak nie będzie nigdzie dostępny, więc w tym wypadku użycie delete jest ok.
+
+// Routes for managing tour favourites.
+router
+  .route('/favouriteTours/:tourId')
+  .patch(userController.addTourToFavourites)
+  .delete(userController.deleteTourFromFavourites);
 
 // After this line of code, only admins will get access to middlewares/functions below
 router.use(authController.restrictTo('admin'));

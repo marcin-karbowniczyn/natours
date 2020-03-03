@@ -8555,7 +8555,7 @@ exports.bookTour = bookTour;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.displayTourCards = exports.setBtnIcon = exports.isFavourite = exports.removeTourFromFavourites = exports.addTourToFavourites = exports.restoreFavourites = void 0;
+exports.deleteTourFromFavourites = exports.addTourToFavourites = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -8567,96 +8567,206 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var restoreFavourites = function restoreFavourites() {
-  var favourites = [];
-  var storage = JSON.parse(localStorage.getItem('favourites'));
-  if (storage) favourites = storage;
-  return favourites;
-};
-
-exports.restoreFavourites = restoreFavourites;
-
-var addTourToFavourites = function addTourToFavourites(favouritesArr, tourId) {
-  // 1. Push new tour to array of favourites
-  favouritesArr.push(tourId); // 2. Update favourites saved to localStorage
-
-  localStorage.setItem('favourites', JSON.stringify(favouritesArr));
-};
-
-exports.addTourToFavourites = addTourToFavourites;
-
-var removeTourFromFavourites = function removeTourFromFavourites(favouritesArr, tourId) {
-  // 1. Delete tourId from favourites array
-  var index = favouritesArr.indexOf(tourId);
-  favouritesArr.splice(index, 1); // 2. Update favourites in localStorage
-
-  localStorage.setItem('favourites', JSON.stringify(favouritesArr));
-};
-
-exports.removeTourFromFavourites = removeTourFromFavourites;
-
-var isFavourite = function isFavourite(tourId, favourites) {
-  return favourites.includes(tourId);
-};
-
-exports.isFavourite = isFavourite;
-
-var setBtnIcon = function setBtnIcon(button, icon, msg) {
-  var useElement = button.querySelector('use');
-  useElement.setAttribute('xlink:href', "/img/icons.svg#icon-".concat(icon));
-  button.querySelector('.heading-box__text').textContent = msg;
-};
-
-exports.setBtnIcon = setBtnIcon;
-
-var renderTourCards = function renderTourCards(tour, cardsContainer) {
-  var markup = "\n    <div class=\"card\">\n      <div class=\"card__header\">\n        <div class=\"card__picture\">\n          <div class=\"card__picture-overlay\">&nbsp;</div>\n          <img\n            src=\"/img/tours/".concat(tour.imageCover, "\" \n            alt=\"").concat(tour.name, "\"\n            class=\"card__picture-img\"\n          />\n        </div>\n        <h3 class=\"heading-tertirary\">\n          <span>").concat(tour.name, "</span>\n        </h3>\n      </div>\n      <div class=\"card__details\">\n        <h4 class=\"card__sub-heading\">").concat(tour.difficulty, " ").concat(tour.duration, "-day tour</h4>\n        <p class=\"card__text\">\n          ").concat(tour.summary, "\n        </p>\n        <div class=\"card__data\">\n          <svg class=\"card__icon\">\n            <use xlink:href=\"img/icons.svg#icon-map-pin\"></use>\n          </svg>\n          <span>").concat(tour.startLocation.description, "</span>\n        </div>\n        <div class=\"card__data\">\n          <svg class=\"card__icon\">\n            <use xlink:href=\"img/icons.svg#icon-calendar\"></use>\n          </svg>\n          <span>").concat(tour.startDates[0].date.toLocaleString('en-us', {
-    month: 'long',
-    year: 'numeric'
-  }), "</span>\n        </div>\n        <div class=\"card__data\">\n          <svg class=\"card__icon\">\n            <use xlink:href=\"img/icons.svg#icon-flag\"></use>\n          </svg>\n          <span>").concat(tour.locations.length, " stops</span>\n        </div>\n        <div class=\"card__data\">\n          <svg class=\"card__icon\">\n            <use xlink:href=\"img/icons.svg#icon-user\"></use>\n          </svg>\n          <span>").concat(tour.maxGroupSize, " people</span>\n        </div>\n      </div>\n      <div class=\"card__footer\">\n        <p>\n          <span class=\"card__footer-value\">$").concat(tour.price, "</span>\n          <span class=\"card__footer-text\">per person</span>\n        </p>\n        <p class=\"card__ratings\">\n          <span class=\"card__footer-value\">").concat(tour.ratingsAverage, "</span>\n          <span class=\"card__footer-text\">rating (").concat(tour.ratingsQuantity, ")</span>\n        </p>\n        <a href=\"/tour/").concat(tour.slug, "\" class=\"btn btn--green btn--small\">Details</a>\n      </div>\n    </div>\n  ");
-  cardsContainer.insertAdjacentHTML('afterbegin', markup);
-};
-
-var displayTourCards =
+var addTourToFavourites =
 /*#__PURE__*/
 function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(favTours, cardsContainer) {
-    var results, tours;
+  regeneratorRuntime.mark(function _callee(tourId) {
+    var res;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.next = 2;
+            _context.prev = 0;
+            _context.next = 3;
             return (0, _axios.default)({
-              method: 'GET',
-              url: '/api/v1/tours'
+              method: 'PATCH',
+              url: "/api/v1/users/favouriteTours/".concat(tourId)
             });
 
-          case 2:
-            results = _context.sent;
-            tours = results.data.data.data.filter(function (el) {
-              return favTours.includes(el._id);
-            });
-            tours.forEach(function (el) {
-              return renderTourCards(el, cardsContainer);
-            });
+          case 3:
+            res = _context.sent;
 
-          case 5:
+            if (res.data.status === 'success') {
+              (0, _alerts.showAlert)('success', 'Tour added to favourites!');
+              setTimeout(function () {
+                location.reload();
+              }, 1500);
+            }
+
+            _context.next = 10;
+            break;
+
+          case 7:
+            _context.prev = 7;
+            _context.t0 = _context["catch"](0);
+            (0, _alerts.showAlert)('error', _context.t0.response.data.message);
+
+          case 10:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee);
+    }, _callee, null, [[0, 7]]);
   }));
 
-  return function displayTourCards(_x, _x2) {
+  return function addTourToFavourites(_x) {
     return _ref.apply(this, arguments);
   };
 }();
 
-exports.displayTourCards = displayTourCards;
+exports.addTourToFavourites = addTourToFavourites;
+
+var deleteTourFromFavourites =
+/*#__PURE__*/
+function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee2(tourId) {
+    var res;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.prev = 0;
+            _context2.next = 3;
+            return (0, _axios.default)({
+              method: 'DELETE',
+              url: "/api/v1/users/favouriteTours/".concat(tourId)
+            });
+
+          case 3:
+            res = _context2.sent;
+
+            if (res.status === 204) {
+              (0, _alerts.showAlert)('success', 'Tour deleted from favourites.');
+              setTimeout(function () {
+                location.reload();
+              }, 1500);
+            }
+
+            _context2.next = 10;
+            break;
+
+          case 7:
+            _context2.prev = 7;
+            _context2.t0 = _context2["catch"](0);
+            (0, _alerts.showAlert)('error', _context2.t0.response.data.message);
+
+          case 10:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2, null, [[0, 7]]);
+  }));
+
+  return function deleteTourFromFavourites(_x2) {
+    return _ref2.apply(this, arguments);
+  };
+}(); // ......... FRONTENDOWY SPOSÓB NA ZAPIS WYCIECZEK W ULUBIONYCH .............. //
+// ......... ZAPIS DOKONOWANY BYŁ W LOACALSOTRAGE, OSTATECZNIE ZASTĄPIONY ZAPISEM W BAZIE DANYCH.............. //
+// export const restoreFavourites = () => {
+//   let favourites = [];
+//   const storage = JSON.parse(localStorage.getItem('favourites'));
+//   if (storage) favourites = storage;
+//   return favourites;
+// };
+// export const addTourToFavourites = (favouritesArr, tourId) => {
+//   // 1. Push new tour to array of favourites
+//   favouritesArr.push(tourId);
+//   // 2. Update favourites saved to localStorage
+//   localStorage.setItem('favourites', JSON.stringify(favouritesArr));
+// };
+// export const removeTourFromFavourites = (favouritesArr, tourId) => {
+//   // 1. Delete tourId from favourites array
+//   const index = favouritesArr.indexOf(tourId);
+//   favouritesArr.splice(index, 1);
+//   // 2. Update favourites in localStorage
+//   localStorage.setItem('favourites', JSON.stringify(favouritesArr));
+// };
+// export const isFavourite = (tourId, favourites) => {
+//   return favourites.includes(tourId);
+// };
+// export const setBtnIcon = (button, icon, msg) => {
+//   const useElement = button.querySelector('use');
+//   useElement.setAttribute('xlink:href', `/img/icons.svg#icon-${icon}`);
+//   button.querySelector('.heading-box__text').textContent = msg;
+// };
+// const renderTourCards = (tour, cardsContainer) => {
+//   const markup = `
+//     <div class="card">
+//       <div class="card__header">
+//         <div class="card__picture">
+//           <div class="card__picture-overlay">&nbsp;</div>
+//           <img
+//             src="/img/tours/${tour.imageCover}"
+//             alt="${tour.name}"
+//             class="card__picture-img"
+//           />
+//         </div>
+//         <h3 class="heading-tertirary">
+//           <span>${tour.name}</span>
+//         </h3>
+//       </div>
+//       <div class="card__details">
+//         <h4 class="card__sub-heading">${tour.difficulty} ${tour.duration}-day tour</h4>
+//         <p class="card__text">
+//           ${tour.summary}
+//         </p>
+//         <div class="card__data">
+//           <svg class="card__icon">
+//             <use xlink:href="img/icons.svg#icon-map-pin"></use>
+//           </svg>
+//           <span>${tour.startLocation.description}</span>
+//         </div>
+//         <div class="card__data">
+//           <svg class="card__icon">
+//             <use xlink:href="img/icons.svg#icon-calendar"></use>
+//           </svg>
+//           <span>${tour.startDates[0].date.toLocaleString('en-us', { month: 'long', year: 'numeric'})}</span>
+//         </div>
+//         <div class="card__data">
+//           <svg class="card__icon">
+//             <use xlink:href="img/icons.svg#icon-flag"></use>
+//           </svg>
+//           <span>${tour.locations.length} stops</span>
+//         </div>
+//         <div class="card__data">
+//           <svg class="card__icon">
+//             <use xlink:href="img/icons.svg#icon-user"></use>
+//           </svg>
+//           <span>${tour.maxGroupSize} people</span>
+//         </div>
+//       </div>
+//       <div class="card__footer">
+//         <p>
+//           <span class="card__footer-value">$${tour.price}</span>
+//           <span class="card__footer-text">per person</span>
+//         </p>
+//         <p class="card__ratings">
+//           <span class="card__footer-value">${tour.ratingsAverage}</span>
+//           <span class="card__footer-text">rating (${tour.ratingsQuantity})</span>
+//         </p>
+//         <a href="/tour/${tour.slug}" class="btn btn--green btn--small">Details</a>
+//       </div>
+//     </div>
+//   `;
+//   cardsContainer.insertAdjacentHTML('afterbegin', markup)
+// }
+// export const displayTourCards = async (favTours, cardsContainer) => {
+//   const results = await axios({
+//     method: 'GET',
+//     url: '/api/v1/tours'
+//   });
+//   const tours = results.data.data.data.filter(el => favTours.includes(el._id));
+//   tours.forEach(el => renderTourCards(el, cardsContainer));
+// };
+// ................ KONIEC FUNKCJI ODPOWIEDZIALNYCH ZA ZAPISYWANIE W ULUBIONYCH ................... //
+
+
+exports.deleteTourFromFavourites = deleteTourFromFavourites;
 },{"axios":"../../node_modules/axios/index.js","./alerts":"alerts.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
@@ -9028,40 +9138,84 @@ if (userPasswordForm) {
       return _ref.apply(this, arguments);
     };
   }());
-} // ......... FRONTENDOWY SPOSÓB NA ZAPIS WYCIECZEK W ULUBIONYCH .............. //
-
-
-if (favouriteBtn) {
-  var tourId = favouriteBtn.closest('button').dataset.tourId;
-  var favourites = favouriteTours.restoreFavourites(); // Check if tour is in favourites, this is a flag of true/false
-
-  var isTourFavourite = favouriteTours.isFavourite(tourId, favourites); // Set icon, and message
-
-  if (isTourFavourite) {
-    favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites');
-  } else {
-    favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
-  }
-
-  favouriteBtn.addEventListener('click', function () {
-    // Check if is favourite(flag), and change/update localStorage and icon.
-    if (isTourFavourite) {
-      favouriteTours.removeTourFromFavourites(favourites, tourId);
-      favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
-      isTourFavourite = false;
-    } else {
-      favouriteTours.addTourToFavourites(favourites, tourId);
-      favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites!');
-      isTourFavourite = true;
-    }
-  });
 }
 
-if (document.querySelector('.favourite-tours')) {
-  var _favourites = favouriteTours.restoreFavourites();
+if (favouriteBtn) {
+  var tourId = favouriteBtn.dataset.tourId;
+  var icon = favouriteBtn.querySelector('use').getAttribute('xlink:href');
 
-  favouriteTours.displayTourCards(_favourites, document.querySelector('.favourite-tours'));
-} // ................ KONIEC FUNKCJI ODPOWIEDZIALNYCH ZA ZAPISYWANIE W ULUBIONYCH ................... //
+  if (icon.includes('heart')) {
+    favouriteBtn.addEventListener('click',
+    /*#__PURE__*/
+    _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee2() {
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return favouriteTours.addTourToFavourites(tourId);
+
+            case 2:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    })));
+  } else if (icon.includes('trash')) {
+    favouriteBtn.addEventListener('click',
+    /*#__PURE__*/
+    _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee3() {
+      return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return favouriteTours.deleteTourFromFavourites(tourId);
+
+            case 2:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    })));
+  }
+} // ......... FRONTENDOWY SPOSÓB NA ZAPIS WYCIECZEK W ULUBIONYCH .............. //
+// ......... ZAPIS DOKONOWANY BYŁ W LOACALSOTRAGE, OSTATECZNIE ZASTĄPIONY ZAPISEM W BAZIE DANYCH.............. //
+// if (favouriteBtn) {
+//   const tourId = favouriteBtn.closest('button').dataset.tourId;
+//   let favourites = favouriteTours.restoreFavourites();
+//   // Check if tour is in favourites, this is a flag of true/false
+//   let isTourFavourite = favouriteTours.isFavourite(tourId, favourites);
+//   // Set icon, and message
+//   if (isTourFavourite) {
+//     favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites');
+//   } else {
+//     favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
+//   }
+//   favouriteBtn.addEventListener('click', () => {
+//     // Check if is favourite(flag), and change/update localStorage and icon.
+//     if (isTourFavourite) {
+//       favouriteTours.removeTourFromFavourites(favourites, tourId);
+//       favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
+//       isTourFavourite = false;
+//     } else {
+//       favouriteTours.addTourToFavourites(favourites, tourId);
+//       favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites!');
+//       isTourFavourite = true;
+//     }
+//   });
+// }
+// if (document.querySelector('.favourite-tours')) {
+//   let favourites = favouriteTours.restoreFavourites();
+//   favouriteTours.displayTourCards(favourites, document.querySelector('.favourite-tours'));
+// }
+// ................ KONIEC FUNKCJI ODPOWIEDZIALNYCH ZA ZAPISYWANIE W ULUBIONYCH ................... //
 
 
 if (bookBtn) {
@@ -9104,7 +9258,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59073" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60347" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

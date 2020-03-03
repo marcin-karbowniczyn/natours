@@ -2,9 +2,49 @@ const multer = require('multer');
 const sharp = require('sharp'); // Image processing library for Node.js
 const fs = require('fs');
 const User = require('./../models/userModel');
+const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+
+exports.checkIfFavourite = catchAsync(async (req, res, next) => {
+  if (req.user) {
+    const tour = await Tour.findOne({ slug: req.params.slug }).populate({
+      path: 'reviews',
+      fields: 'review rating user'
+    });
+
+    res.locals.isFavourite = req.user.isTourFavourite(tour.id);
+    req.tour = tour;
+  }
+  next();
+});
+
+exports.addTourToFavourites = catchAsync(async (req, res, next) => {
+  if (req.user.favouriteTours.includes(req.params.tourId)) return next(new AppError('This tour is in favourites already.'));
+
+  const updatedUser = await req.user.addToFavourites(req.params.tourId);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      updatedUser
+    }
+  });
+});
+
+exports.deleteTourFromFavourites = catchAsync(async (req, res, next) => {
+  if (!req.user.favouriteTours.includes(req.params.tourId)) return next(new AppError('There is no tour with this id in favourite tours.'));
+
+  await req.user.deleteFromFavourites(req.params.tourId);
+
+  res.status(204).json({
+    status: 'success',
+    data: {
+      data: null
+    }
+  });
+});
 
 // const multerStorage = multer.diskStorage({
 //   // file === req.file, cb === callback function (dziala jak next z express)
@@ -74,9 +114,7 @@ exports.getMe = (req, res, next) => {
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
-    return next(
-      new AppError('This route is not for password updates. Please use /updateMyPassword', 400)
-    );
+    return next(new AppError('This route is not for password updates. Please use /updateMyPassword', 400));
   }
 
   // 2) Filter out unwanted field names that are not allowed to be updated.

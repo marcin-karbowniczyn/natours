@@ -6,7 +6,7 @@ import { signup } from './signup';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { showAlert } from './alerts';
-import *  as favouriteTours  from './favouriteTours';
+import * as favouriteTours from './favouriteTours';
 
 // DOM ELEMENTS //
 const mapBox = document.getElementById('map');
@@ -81,39 +81,55 @@ if (userPasswordForm) {
   });
 }
 
-// ......... FRONTENDOWY SPOSÓB NA ZAPIS WYCIECZEK W ULUBIONYCH .............. //
 if (favouriteBtn) {
-  const tourId = favouriteBtn.closest('button').dataset.tourId;
-  let favourites = favouriteTours.restoreFavourites();
+  const tourId = favouriteBtn.dataset.tourId;
+  const icon = favouriteBtn.querySelector('use').getAttribute('xlink:href');
 
-  // Check if tour is in favourites, this is a flag of true/false
-  let isTourFavourite = favouriteTours.isFavourite(tourId, favourites);
-
-  // Set icon, and message
-  if (isTourFavourite) {
-    favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites');
-  } else {
-    favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
+  if (icon.includes('heart')) {
+    favouriteBtn.addEventListener('click', async () => {
+      await favouriteTours.addTourToFavourites(tourId);
+    });
+  } else if (icon.includes('trash')) {
+    favouriteBtn.addEventListener('click', async () => {
+      await favouriteTours.deleteTourFromFavourites(tourId);
+    })
   }
-
-  favouriteBtn.addEventListener('click', () => {
-    // Check if is favourite(flag), and change/update localStorage and icon.
-    if (isTourFavourite) {
-      favouriteTours.removeTourFromFavourites(favourites, tourId);
-      favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
-      isTourFavourite = false;
-    } else {
-      favouriteTours.addTourToFavourites(favourites, tourId);
-      favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites!');
-      isTourFavourite = true;
-    }
-  });
 }
 
-if (document.querySelector('.favourite-tours')) {
-  let favourites = favouriteTours.restoreFavourites();
-  favouriteTours.displayTourCards(favourites, document.querySelector('.favourite-tours'));
-}
+// ......... FRONTENDOWY SPOSÓB NA ZAPIS WYCIECZEK W ULUBIONYCH .............. //
+// ......... ZAPIS DOKONOWANY BYŁ W LOACALSOTRAGE, OSTATECZNIE ZASTĄPIONY ZAPISEM W BAZIE DANYCH.............. //
+// if (favouriteBtn) {
+//   const tourId = favouriteBtn.closest('button').dataset.tourId;
+//   let favourites = favouriteTours.restoreFavourites();
+
+//   // Check if tour is in favourites, this is a flag of true/false
+//   let isTourFavourite = favouriteTours.isFavourite(tourId, favourites);
+
+//   // Set icon, and message
+//   if (isTourFavourite) {
+//     favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites');
+//   } else {
+//     favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
+//   }
+
+//   favouriteBtn.addEventListener('click', () => {
+//     // Check if is favourite(flag), and change/update localStorage and icon.
+//     if (isTourFavourite) {
+//       favouriteTours.removeTourFromFavourites(favourites, tourId);
+//       favouriteTours.setBtnIcon(favouriteBtn, 'heart', 'Add this tour to your favourites!');
+//       isTourFavourite = false;
+//     } else {
+//       favouriteTours.addTourToFavourites(favourites, tourId);
+//       favouriteTours.setBtnIcon(favouriteBtn, 'trash', 'Delete this tour from your favourites!');
+//       isTourFavourite = true;
+//     }
+//   });
+// }
+
+// if (document.querySelector('.favourite-tours')) {
+//   let favourites = favouriteTours.restoreFavourites();
+//   favouriteTours.displayTourCards(favourites, document.querySelector('.favourite-tours'));
+// }
 // ................ KONIEC FUNKCJI ODPOWIEDZIALNYCH ZA ZAPISYWANIE W ULUBIONYCH ................... //
 
 if (bookBtn) {

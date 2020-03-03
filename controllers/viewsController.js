@@ -6,11 +6,12 @@ const AppError = require('../utils/appError');
 
 exports.alerts = (req, res, next) => {
   const alert = req.query.alert;
-  if (alert === 'booking') 
-    res.locals.alert = 'Your booking was successful! Please check your email for a confirmation. If your booking doesn\'t show up here immediately, please come back later.'
+  if (alert === 'booking')
+    res.locals.alert =
+      "Your booking was successful! Please check your email for a confirmation. If your booking doesn't show up here immediately, please come back later.";
 
   next();
-}
+};
 
 exports.getOverview = catchAsync(async (req, res, next) => {
   // 1) Get tour data from collection
@@ -25,10 +26,15 @@ exports.getOverview = catchAsync(async (req, res, next) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findOne({ slug: req.params.slug }).populate({
-    path: 'reviews',
-    fields: 'review rating user'
-  });
+  let tour;
+  if (req.tour) {
+    tour = req.tour;
+  } else {
+    tour = await Tour.findOne({ slug: req.params.slug }).populate({
+      path: 'reviews',
+      fields: 'review rating user'
+    });
+  }
 
   if (!tour) {
     return next(new AppError('There is no tour with that name.', 404));
@@ -43,8 +49,8 @@ exports.getTour = catchAsync(async (req, res, next) => {
 exports.getSignUpForm = (req, res) => {
   res.status(200).render('signup', {
     title: 'Sign up to our site'
-  })
-}
+  });
+};
 
 exports.getLoginForm = (req, res) => {
   res.status(200).render('login', {
@@ -71,17 +77,28 @@ exports.getMyTours = catchAsync(async (req, res, next) => {
   // const tourPromises = tourIds.map(el => Tour.findById(el));
   // const tours = await Promise.all(tourPromises);
 
-
   res.status(200).render('overview', {
     title: 'My Tours',
     tours
   });
 });
 
+// ......... FRONTENDOWY SPOSÓB NA ZAPIS WYCIECZEK W ULUBIONYCH .............. //
+// ......... OSTATECZNIE ZASTĄPIONY ZAPISEM W BAZIE DANYCH .............. //
+// exports.getMyFavouriteTours = catchAsync(async (req, res, next) => {
+//   res.status(200).render('favouriteTours', {
+//     title: 'My favourite tours'
+//   });
+// });
+
 exports.getMyFavouriteTours = catchAsync(async (req, res, next) => {
-  res.status(200).render('favouriteTours', {
-    title: 'My favourite tours'
-  })
+  const favouriteToursIds = req.user.favouriteTours;
+  const tours = await Tour.find({ _id: { $in: favouriteToursIds } });
+
+  res.status(200).render('overview', {
+    title: 'My favourite tours',
+    tours
+  });
 });
 
 exports.updateUserData = catchAsync(async (req, res, next) => {

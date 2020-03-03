@@ -35,12 +35,12 @@ block content
           svg.heading-box__icon
             use(xlink:href='/img/icons.svg#icon-map-pin')
           span.heading-box__text= tour.startLocation.description
-        .heading-box__detail
-          button#fav-btn(data-tour-id=`${tour.id}`) 
-            svg.heading-box__icon
-              use(xlink:href='/img/icons.svg#icon-heart')
-            span.heading-box__text Add this tour to your favourites!     
-            //- trash
+        if (user)  
+          .heading-box__detail
+            button#fav-btn(data-tour-id=`${tour.id}`)
+              svg.heading-box__icon
+                use(xlink:href=`/img/icons.svg#icon-${isFavourite ? 'trash' : 'heart'}`)
+              span.heading-box__text= `${isFavourite ? 'Remove this tour from your favourites ' : 'Add this tour to your favourites!'}`     
   section.section-description
     .overview-box
       div
